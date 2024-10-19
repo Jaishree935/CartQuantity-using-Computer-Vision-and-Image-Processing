@@ -1,0 +1,14 @@
+pip install torch matplotlib ipywidgets pillow
+pip install torch torchvision torchaudio matplotlib ipywidgets pillow
+
+Description : 
+Torch (PyTorch):
+ A deep learning library that facilitates the implementation and training of 
+neural networks, used here to load and run the YOLOv5 model.
+Ipywidgets:
+ A library for creating interactive widgets, used for the image upload feature.
+Pillow (PIL): 
+ A Python library for image manipulation and processing.
+Numpy: 
+ A library for handling numerical computations and converting images into 
+arrays.
