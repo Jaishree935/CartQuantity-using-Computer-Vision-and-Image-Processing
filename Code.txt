@@ -1,0 +1,57 @@
+import torch
+from matplotlib import pyplot as plt
+import ipywidgets as widgets
+from IPython.display import display
+from PIL import Image
+import io
+import numpy as np
+import warnings
+
+# Suppress future warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+# Load the pre-trained YOLOv5 model
+model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+
+# Create a file upload widget for the user to upload their image
+upload_widget = widgets.FileUpload(accept='image/*', multiple=False)
+
+# Function to handle file upload and process the image
+def handle_upload(change):
+    # Get the uploaded file
+    uploaded_file = list(change['new'].values())[0]
+
+    # Convert the file content into a byte stream and read the image
+    image_stream = io.BytesIO(uploaded_file['content'])
+    image = Image.open(image_stream).convert('RGB')  # Ensure it's in RGB format
+
+    # Convert the image into a format suitable for YOLOv5 model
+    img_np = np.array(image)
+
+    # Run the image through the YOLOv5 model for object detection
+    results = model(img_np)
+
+    # Render the results (draw bounding boxes on the image)
+    rendered_img = np.squeeze(results.render())  # Render the detections on the image
+
+    # Display the input image with bounding boxes drawn around detected objects
+    plt.figure(figsize=(10, 10))
+    plt.imshow(rendered_img)
+    plt.title('Detected Objects in Cart')
+    plt.axis('off')
+    plt.show()
+
+    # Count the number of each detected item
+    detected_objects = results.pandas().xyxy[0]  # Get the results in pandas DataFrame format
+    object_counts = detected_objects['name'].value_counts()  # Count occurrences of each object
+
+    # Display the counts of each object
+    print("Item counts in the cart:")
+    for item, count in object_counts.items():
+        print(f"{item}: {count}")
+
+# Bind the file upload widget to the handler function
+upload_widget.observe(handle_upload, names='value')
+
+# Display the widget
+display(upload_widget)
